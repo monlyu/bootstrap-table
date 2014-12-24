@@ -17,6 +17,54 @@ To get started, check out http://bootstrap-table.wenzhixin.net.cn!
 
 ## Bugs & Enhancements (next version)
 
+<br/>
+非常感谢原作者
+<br/>
+## 相对于原作者版本
+
+<pre>
+	当返回的数据不是一个数组的时候，通过自身处理本身比较复杂.如 
+	{
+		status : 200,
+		data : {
+			rowcount : 300,
+			resp : [ {..},{..}]]
+		}
+	}
+</pre>
+ 
+ * 把默认的语言改为中文了，其他语言基本上没用到,减少一个js的引用
+ 
+ * 增加 data-page-items 属性
+   
+   显示数据所对应的位置，如上面的例子显示：data.resp
+ 	
+ * 增加 data-page-row-count 属性
+ 	
+    显示所有的列总数数据所对应的位置，如上面的例子显示：data.rowcount
+ 	
+ * 增加 data-page-extra 属性
+ 	
+	如果在查询的时候需要加入其他参数，而pageNumber,pageSize等参数我不想做任何改变。
+	可以调用函数来获得其他的参数输入。
+
+<pre>
+		data-page-extra = "queryArgs"
+		
+		/*
+		 * base 为系统提交之前所有的参数集合，这个地方你可以覆盖原有的任何参数
+		 *
+		 */
+		function queryArgs(base) {
+		    return {
+		    	'type' : 200,
+		    	'time' : 'now'
+		    };
+		}
+</pre>
+
+
+
 ## Features
 
 * Created for Bootstrap 3 (Bootstrap 2 supported)
@@ -77,3 +125,4 @@ grunt build
 ```
 
 Result will appear in `dist` directory.
+

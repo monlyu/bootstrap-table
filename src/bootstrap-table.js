@@ -77,7 +77,23 @@
         return w1 - w2;
     };
 
+    var calcValueTrack       = function(value,path,defaultValue){
+         try{
+         if (typeof path === 'string') {
+             var paths = path.split('.');
+             var temp = value;
+             $.each(paths, function (i, f) {
+                 temp = temp[f];
+             });
+            return temp;
+         }
+         }catch(e){
+            
+         }
+         return defaultValue;
+    }
     var calculateObjectValue = function (self, name, args, defaultValue) {
+        
         if (typeof name === 'string') {
             // support obj.func1.func2
             var names = name.split('.');
@@ -172,9 +188,12 @@
             toggle: 'glyphicon-list-alt icon-list-alt',
             columns: 'glyphicon-th icon-th'
         },
-
+        
+        pageItems : 'data',
+        pageRowCount : 'data.length',
+        pageExtra : function (args){ return false;},
+        
         rowStyle: function (row, index) {return {};},
-
         rowAttributes: function (row, index) {return {};},
 
         onAll: function (name, args) {return false;},
@@ -196,34 +215,34 @@
 
     BootstrapTable.LOCALES = [];
 
-    BootstrapTable.LOCALES['en-US'] = {
+    BootstrapTable.LOCALES['zh-CN'] = {
         formatLoadingMessage: function () {
-            return 'Loading, please wait…';
+            return '加载中请稍后..';
         },
         formatRecordsPerPage: function (pageNumber) {
-            return sprintf('%s records per page', pageNumber);
+            return sprintf('%s 条', pageNumber);
         },
         formatShowingRows: function (pageFrom, pageTo, totalRows) {
-            return sprintf('Showing %s to %s of %s rows', pageFrom, pageTo, totalRows);
+            return sprintf(' 显示第 %s 到 %s ,共 %s 条记录，每页显示', pageFrom, pageTo, totalRows);
         },
         formatSearch: function () {
-            return 'Search';
+            return '关键字搜索';
         },
         formatNoMatches: function () {
-            return 'No matching records found';
+            return '没有找到任何匹配的数据';
         },
         formatRefresh: function () {
-            return 'Refresh';
+            return '刷新';
         },
         formatToggle: function () {
-            return 'Toggle';
+            return '切换显示';
         },
         formatColumns: function () {
-            return 'Columns';
+            return '列';
         }
     };
 
-    $.extend(BootstrapTable.DEFAULTS, BootstrapTable.LOCALES['en-US']);
+    $.extend(BootstrapTable.DEFAULTS, BootstrapTable.LOCALES['zh-CN']);
 
     BootstrapTable.COLUMN_DEFAULTS = {
         radio: false,
@@ -581,7 +600,7 @@
         if (this.options.showColumns) {
             html.push(sprintf('<div class="keep-open btn-group" title="%s">',
                 this.options.formatColumns()),
-                '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">',
+                '<button type="button" class="btn btn-default dropdown-toggle " data-toggle="dropdown">',
                 sprintf('<i class="%s %s"></i>', this.options.iconsPrefix, this.options.icons.columns),
                 ' <span class="caret"></span>',
                 '</button>',
@@ -761,7 +780,7 @@
 
         var pageNumber = [
             '<span class="btn-group dropup">',
-            '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">',
+            '<button type="button" class="btn btn-sm btn-default dropdown-toggle btn-xs" data-toggle="dropdown">',
             '<span class="page-size">',
             this.options.pageSize,
             '</span>',
@@ -792,7 +811,7 @@
 
         html.push('</div>',
             '<div class="pull-right pagination">',
-                '<ul class="pagination">',
+                '<ul class="pagination pagination-sm">',
                     '<li class="page-first"><a href="javascript:void(0)">&lt;&lt;</a></li>',
                     '<li class="page-pre"><a href="javascript:void(0)">&lt;</a></li>');
 
@@ -1166,8 +1185,14 @@
                 order: params.sortOrder
             };
         }
+        
         data = calculateObjectValue(this.options, this.options.queryParams, [params], data);
-
+        
+        var extra = calculateObjectValue(this.options,this.options.pageExtra,[data],data);
+        
+        if(extra!=false)
+            data = $.extend(data,extra);
+        
         // false to stop request
         if (data === false) {
             return;
@@ -1186,12 +1211,10 @@
             dataType: this.options.dataType,
             success: function (res) {
                 res = calculateObjectValue(that.options, that.options.responseHandler, [res], res);
-
                 var data = res;
-
                 if (that.options.sidePagination === 'server') {
-                    that.options.totalRows = res.total;
-                    data = res.rows;
+                    that.options.totalRows = calcValueTrack(res,that.options.pageRowCount,0);
+                    data = calcValueTrack(res,that.options.pageItems,[]);
                 }
                 that.load(data);
                 that.trigger('load-success', data);
